@@ -1,16 +1,16 @@
 # Mkulima 🌱
 
-**AI-powered farming assistant for Kenyan and East African farmers.**
+**AI-powered farming assistant for Tanzanian farmers.**
 
-Mkulima (*farmer* in Swahili) helps smallholder farmers with crop advice, pest diagnosis, seasonal calendars, and weather-aware tips — in both **Kiswahili** and **English**.
+Mkulima (*farmer* in Swahili) helps smallholder farmers across Tanzania with crop advice, pest diagnosis, seasonal calendars, and weather-aware tips — in both **Kiswahili** and **English**.
 
 ## Features
 
-- **AI Crop Advisor** — Chat with an AI that knows your crops, location, and season
+- **AI Crop Advisor** — Chat with an AI that knows your crops, mkoa (region), and season
 - **Photo Diagnosis** — Upload a plant photo for pest/disease identification
 - **Crop Calendar** — Seasonal tasks tailored to your crops
-- **Weather Tips** — Context-aware guidance based on the current season
-- **Farmer Profile** — Personalize advice with your farm details
+- **Weather Tips** — Context-aware guidance for Tanzania's rainy and dry seasons
+- **Farmer Profile** — Wilaya/kijiji, mkoa, crops, and language preference
 - **Mobile-first PWA** — Works beautifully on phones in the field
 
 ## Getting Started
@@ -22,14 +22,16 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-### AI Features (Optional)
-
-For full AI chat and photo diagnosis, add your OpenAI API key:
+### Environment Variables
 
 ```bash
 cp .env.example .env.local
-# Edit .env.local and add your OPENAI_API_KEY
 ```
+
+| Variable | Description |
+|----------|-------------|
+| `OPENAI_API_KEY` | Optional — enables full AI chat and photo diagnosis |
+| `NEXT_PUBLIC_SITE_URL` | Your production domain (default: `https://mkulima.co.tz`) |
 
 Without an API key, the app still works with built-in smart fallback responses.
 

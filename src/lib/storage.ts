@@ -6,7 +6,7 @@ const CHAT_KEY = "mkulima_chat";
 export const defaultProfile: FarmerProfile = {
   name: "",
   location: "",
-  county: "",
+  region: "",
   farmSize: "",
   crops: [],
   language: "sw",
@@ -17,7 +17,12 @@ export function getProfile(): FarmerProfile {
   if (typeof window === "undefined") return defaultProfile;
   try {
     const stored = localStorage.getItem(PROFILE_KEY);
-    return stored ? { ...defaultProfile, ...JSON.parse(stored) } : defaultProfile;
+    if (!stored) return defaultProfile;
+    const parsed = JSON.parse(stored) as Partial<FarmerProfile> & { county?: string };
+    if (parsed.county && !parsed.region) {
+      parsed.region = parsed.county;
+    }
+    return { ...defaultProfile, ...parsed };
   } catch {
     return defaultProfile;
   }

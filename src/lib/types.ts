@@ -13,7 +13,7 @@ export type CropType =
 export interface FarmerProfile {
   name: string;
   location: string;
-  county: string;
+  region: string;
   farmSize: string;
   crops: CropType[];
   language: Language;

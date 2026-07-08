@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { Save, Check } from "lucide-react";
 import { getProfile, saveProfile, defaultProfile } from "@/lib/storage";
-import { cropLabels, kenyanCounties } from "@/lib/crops";
+import { cropLabels, tanzanianRegions } from "@/lib/crops";
+import { SITE_CONFIG } from "@/lib/site";
 import type { CropType, FarmerProfile } from "@/lib/types";
 import { Card } from "./card";
 import { cn } from "@/lib/utils";
@@ -81,29 +82,29 @@ export function ProfileForm() {
           label={isSw ? "Jina lako" : "Your name"}
           value={profile.name}
           onChange={(v) => update("name", v)}
-          placeholder={isSw ? "Mfano: Juma Mwangi" : "e.g. Juma Mwangi"}
+          placeholder={isSw ? "Mfano: Juma Hassan" : "e.g. Juma Hassan"}
         />
 
         <Field
-          label={isSw ? "Eneo / Kijiji" : "Location / Village"}
+          label={isSw ? "Wilaya / Kijiji" : "District / Village"}
           value={profile.location}
           onChange={(v) => update("location", v)}
-          placeholder={isSw ? "Mfano: Kikuyu" : "e.g. Kikuyu"}
+          placeholder={isSw ? "Mfano: Mvomero, Morogoro" : "e.g. Mvomero, Morogoro"}
         />
 
         <div>
           <label className="text-xs font-semibold uppercase tracking-wide text-forest">
-            {isSw ? "Kaunti" : "County"}
+            {isSw ? "Mkoa" : "Region"}
           </label>
           <select
-            value={profile.county}
-            onChange={(e) => update("county", e.target.value)}
+            value={profile.region}
+            onChange={(e) => update("region", e.target.value)}
             className="mt-1.5 w-full rounded-xl border border-card-border bg-cream px-4 py-2.5 text-sm text-soil focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/20"
           >
-            <option value="">{isSw ? "Chagua kaunti" : "Select county"}</option>
-            {kenyanCounties.map((c) => (
-              <option key={c} value={c}>
-                {c}
+            <option value="">{isSw ? "Chagua mkoa" : "Select region"}</option>
+            {tanzanianRegions.map((r) => (
+              <option key={r} value={r}>
+                {r}
               </option>
             ))}
           </select>
@@ -120,7 +121,7 @@ export function ProfileForm() {
           label={isSw ? "Simu (si lazima)" : "Phone (optional)"}
           value={profile.phone}
           onChange={(v) => update("phone", v)}
-          placeholder="+254..."
+          placeholder={`${SITE_CONFIG.phonePrefix}7...`}
           type="tel"
         />
 

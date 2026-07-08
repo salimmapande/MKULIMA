@@ -11,10 +11,39 @@ export const cropLabels: Record<CropType, { en: string; sw: string }> = {
   sorghum: { en: "Sorghum", sw: "Mtama" },
 };
 
-export const kenyanCounties = [
-  "Nairobi", "Mombasa", "Kisumu", "Nakuru", "Kiambu", "Machakos",
-  "Meru", "Kakamega", "Nyeri", "Uasin Gishu", "Kilifi", "Kitui",
-  "Embu", "Bungoma", "Trans Nzoia", "Murang'a", "Kajiado", "Other",
+export const tanzanianRegions = [
+  "Arusha",
+  "Dar es Salaam",
+  "Dodoma",
+  "Geita",
+  "Iringa",
+  "Kagera",
+  "Katavi",
+  "Kigoma",
+  "Kilimanjaro",
+  "Lindi",
+  "Manyara",
+  "Mara",
+  "Mbeya",
+  "Morogoro",
+  "Mtwara",
+  "Mwanza",
+  "Njombe",
+  "Pemba Kaskazini",
+  "Pemba Kusini",
+  "Pwani",
+  "Rukwa",
+  "Ruvuma",
+  "Shinyanga",
+  "Simiyu",
+  "Singida",
+  "Songwe",
+  "Tabora",
+  "Tanga",
+  "Unguja Kaskazini",
+  "Unguja Kusini",
+  "Unguja Mjini Magharibi",
+  "Other",
 ];
 
 export const calendarTasks: CalendarTask[] = [
