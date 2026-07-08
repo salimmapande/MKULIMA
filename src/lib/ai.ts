@@ -1,6 +1,7 @@
-import type { FarmerProfile } from "./types";
+import type { FarmerProfile, SoilAnalysisResult, SoilObservation } from "./types";
 import { cropLabels } from "./crops";
 import { SITE_CONFIG } from "./site";
+import { fallbackSoilAnalysis } from "./soil";
 
 interface ChatContext {
   profile: FarmerProfile;
@@ -201,4 +202,86 @@ export function getWeatherTips(isSw: boolean) {
       : "Plough and add compost before the main rains arrive.",
     icon: "wind" as const,
   };
+}
+
+function observationSummary(obs: SoilObservation): string {
+  const parts: string[] = [];
+  if (obs.color) parts.push(`color: ${obs.color}`);
+  if (obs.texture) parts.push(`texture: ${obs.texture}`);
+  if (obs.moisture) parts.push(`moisture: ${obs.moisture}`);
+  return parts.length ? parts.join(", ") : "none provided";
+}
+
+export async function generateSoilAnalysis(
+  profile: FarmerProfile,
+  imageBase64?: string,
+  observation: SoilObservation = {}
+): Promise<SoilAnalysisResult> {
+  const isSw = profile.language === "sw";
+  const apiKey = process.env.OPENAI_API_KEY;
+
+  if (apiKey && imageBase64) {
+    try {
+      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          messages: [
+            {
+              role: "system",
+              content: `You are a soil scientist and agronomist for Tanzania. Analyze soil photos and recommend crops and trees to plant.
+
+Respond in JSON only:
+{
+  "soilType": "English name",
+  "soilTypeSw": "Swahili name",
+  "description": "English description",
+  "descriptionSw": "Swahili description",
+  "properties": {"ph":"...","drainage":"...","fertility":"...","texture":"..."},
+  "confidence": 0.0-1.0,
+  "recommendations": [
+    {"name":"...","nameSw":"...","type":"crop|tree","suitability":"excellent|good|moderate","reason":"...","reasonSw":"..."}
+  ],
+  "improvements": "English soil improvement advice",
+  "improvementsSw": "Swahili soil improvement advice"
+}
+
+Include 4-6 recommendations (mix of crops and trees) suited to Tanzanian regions.
+Consider region: ${profile.region || "Tanzania"}, location: ${profile.location || "unknown"}.
+Farmer observations: ${observationSummary(observation)}.`,
+            },
+            {
+              role: "user",
+              content: [
+                {
+                  type: "text",
+                  text: `Analyze this soil sample and recommend crops/trees for a farmer in ${profile.region || "Tanzania"}.`,
+                },
+                { type: "image_url", image_url: { url: imageBase64 } },
+              ],
+            },
+          ],
+          max_tokens: 900,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const text = data.choices[0]?.message?.content ?? "";
+        const match = text.match(/\{[\s\S]*\}/);
+        if (match) {
+          const parsed = JSON.parse(match[0]) as SoilAnalysisResult;
+          if (parsed.recommendations?.length) return parsed;
+        }
+      }
+    } catch {
+      // fall through
+    }
+  }
+
+  return fallbackSoilAnalysis(observation, isSw);
 }

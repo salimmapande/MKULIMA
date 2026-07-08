@@ -51,3 +51,39 @@ export interface DiagnosisResult {
   treatment: string;
   prevention: string;
 }
+
+export type SoilColor = "red" | "brown" | "black" | "yellow" | "gray";
+export type SoilTexture = "clay" | "sandy" | "loam" | "rocky";
+export type SoilMoisture = "dry" | "moist" | "wet";
+
+export interface SoilObservation {
+  color?: SoilColor;
+  texture?: SoilTexture;
+  moisture?: SoilMoisture;
+}
+
+export interface SoilRecommendation {
+  name: string;
+  nameSw: string;
+  type: "crop" | "tree";
+  suitability: "excellent" | "good" | "moderate";
+  reason: string;
+  reasonSw: string;
+}
+
+export interface SoilAnalysisResult {
+  soilType: string;
+  soilTypeSw: string;
+  description: string;
+  descriptionSw: string;
+  properties: {
+    ph: string;
+    drainage: string;
+    fertility: string;
+    texture: string;
+  };
+  confidence: number;
+  recommendations: SoilRecommendation[];
+  improvements: string;
+  improvementsSw: string;
+}

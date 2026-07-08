@@ -7,6 +7,7 @@ Mkulima (*farmer* in Swahili) helps smallholder farmers across Tanzania with cro
 ## Features
 
 - **AI Crop Advisor** — Chat with an AI that knows your crops, mkoa (region), and season
+- **Gundua Ardhi** — Photograph soil to identify type and get crop/tree recommendations
 - **Photo Diagnosis** — Upload a plant photo for pest/disease identification
 - **Crop Calendar** — Seasonal tasks tailored to your crops
 - **Weather Tips** — Context-aware guidance for Tanzania's rainy and dry seasons

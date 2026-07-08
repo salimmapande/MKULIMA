@@ -9,6 +9,7 @@ import {
   Sprout,
   ArrowRight,
   Leaf,
+  LandPlot,
 } from "lucide-react";
 import { getProfile } from "@/lib/storage";
 import { cropLabels, getUpcomingTasks } from "@/lib/crops";
@@ -34,6 +35,15 @@ const quickActions = [
     descEn: "Photo-based pest detection",
     descSw: "Gundua wadudu kwa picha",
     color: "bg-terracotta",
+  },
+  {
+    href: "/ardhi",
+    icon: LandPlot,
+    titleEn: "Gundua Ardhi",
+    titleSw: "Gundua Ardhi",
+    descEn: "Soil analysis & crop recommendations",
+    descSw: "Chambua udongo na pendekeza mazao",
+    color: "bg-soil-light",
   },
   {
     href: "/calendar",
