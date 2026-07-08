@@ -36,9 +36,52 @@ cp .env.example .env.local
 
 Without an API key, the app still works with built-in smart fallback responses.
 
+## Deploy to Cloudflare Workers
+
+This app uses **OpenNext for Cloudflare** (`@opennextjs/cloudflare`), not TanStack Start. If you see:
+
+```
+The entry-point file at "@tanstack/react-start/server-entry" was not found.
+```
+
+Cloudflare was configured for the wrong framework. Use these settings instead.
+
+### One-command deploy (CLI)
+
+```bash
+npm run deploy
+```
+
+Set your OpenAI key as a Cloudflare secret:
+
+```bash
+npx wrangler secret put OPENAI_API_KEY
+```
+
+### GitHub / Cloudflare Workers Builds
+
+In the Cloudflare dashboard for this project:
+
+| Setting | Value |
+|---------|-------|
+| **Framework preset** | None (or Next.js via OpenNext) |
+| **Build command** | `npx opennextjs-cloudflare build` |
+| **Deploy command** | `npx opennextjs-cloudflare deploy` |
+
+Do **not** use TanStack Start or a generic Workers template. The entry point is defined in `wrangler.jsonc` as `.open-next/worker.js`, which is generated during the OpenNext build.
+
+Add `OPENAI_API_KEY` under **Workers → Settings → Variables and Secrets**.
+
+### Local preview (Workers runtime)
+
+```bash
+npm run preview
+```
+
 ## Tech Stack
 
 - **Next.js 16** — App Router, API routes
+- **OpenNext Cloudflare** — Workers deployment adapter
 - **Tailwind CSS 4** — Earthy design system
 - **TypeScript** — Type-safe throughout
 - **Lucide Icons** — Clean iconography
