@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, MessageCircle, Camera, Calendar, User, LandPlot } from "lucide-react";
+import { Home, MessageCircle, Camera, User, LandPlot, Bell } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -10,7 +10,7 @@ const navItems = [
   { href: "/advisor", icon: MessageCircle, label: "Advisor", labelSw: "Mshauri" },
   { href: "/diagnose", icon: Camera, label: "Mmea", labelSw: "Mmea" },
   { href: "/ardhi", icon: LandPlot, label: "Ardhi", labelSw: "Ardhi" },
-  { href: "/calendar", icon: Calendar, label: "Calendar", labelSw: "Kalenda" },
+  { href: "/alerts", icon: Bell, label: "Alerts", labelSw: "Arifa" },
   { href: "/profile", icon: User, label: "Profile", labelSw: "Wasifu" },
 ];
 

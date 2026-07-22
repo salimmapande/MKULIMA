@@ -10,6 +10,7 @@ import {
   ArrowRight,
   Leaf,
   LandPlot,
+  Bell,
 } from "lucide-react";
 import { getProfile } from "@/lib/storage";
 import { cropLabels, getUpcomingTasks } from "@/lib/crops";
@@ -30,10 +31,10 @@ const quickActions = [
   {
     href: "/diagnose",
     icon: Camera,
-    titleEn: "Diagnose Crop",
+    titleEn: "Gundua Mmea",
     titleSw: "Gundua Mmea",
-    descEn: "Photo-based pest detection",
-    descSw: "Gundua wadudu kwa picha",
+    descEn: "AI crop health, pest & bacteria detection",
+    descSw: "Afya ya mmea, wadudu na bakteria kwa AI",
     color: "bg-terracotta",
   },
   {
@@ -41,9 +42,18 @@ const quickActions = [
     icon: LandPlot,
     titleEn: "Gundua Ardhi",
     titleSw: "Gundua Ardhi",
-    descEn: "Soil analysis & crop recommendations",
-    descSw: "Chambua udongo na pendekeza mazao",
+    descEn: "Soil fertility, fertilizer & crop analysis",
+    descSw: "Rutuba, mbolea na uchambuzi wa udongo",
     color: "bg-soil-light",
+  },
+  {
+    href: "/alerts",
+    icon: Bell,
+    titleEn: "SMS Alerts",
+    titleSw: "Arifa za SMS",
+    descEn: "Watering alerts & buy SMS via M-Pesa",
+    descSw: "Arifa za kumwagilia na nunua SMS",
+    color: "bg-moss",
   },
   {
     href: "/calendar",
@@ -52,7 +62,7 @@ const quickActions = [
     titleSw: "Kalenda ya Mazao",
     descEn: "Seasonal farming tasks",
     descSw: "Shughuli za msimu",
-    color: "bg-moss",
+    color: "bg-sage",
   },
 ];
 

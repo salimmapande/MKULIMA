@@ -1,4 +1,6 @@
 import type {
+  FertilizerRecommendation,
+  FertilityLevel,
   SoilAnalysisResult,
   SoilColor,
   SoilMoisture,
@@ -30,6 +32,40 @@ export const soilMoistureOptions: { value: SoilMoisture; en: string; sw: string 
 
 const suitabilityOrder = { excellent: 0, good: 1, moderate: 2 };
 
+function defaultFertilizers(isLow: boolean): FertilizerRecommendation[] {
+  if (!isLow) return [];
+  const items: FertilizerRecommendation[] = [
+    {
+      name: "DAP (Di-Ammonium Phosphate)",
+      nameSw: "DAP",
+      type: "chemical",
+      amount: "200 kg per hectare at planting",
+      amountSw: "kg 200 kwa kila ekari wakati wa kupanda",
+      reason: "Boosts phosphorus for root development.",
+      reasonSw: "Huongeza fosforasi kwa ukuaji wa mizizi.",
+    },
+    {
+      name: "Compost / Farmyard Manure",
+      nameSw: "Komposti / Mbolea ya Asili",
+      type: "manure",
+      amount: "5–10 tonnes per hectare before planting",
+      amountSw: "toni 5–10 kwa kila ekari kabla ya kupanda",
+      reason: "Improves organic matter and water retention.",
+      reasonSw: "Huboresha rutuba na kuhifadhi maji.",
+    },
+    {
+      name: "CAN (Calcium Ammonium Nitrate)",
+      nameSw: "CAN",
+      type: "chemical",
+      amount: "100 kg per hectare as top-dress",
+      amountSw: "kg 100 kwa kila ekari kama mbolea ya juu",
+      reason: "Supplies nitrogen during crop growth.",
+      reasonSw: "Hutoa nitrogen wakati wa ukuaji wa mazao.",
+    },
+  ];
+  return items;
+}
+
 function rec(
   name: string,
   nameSw: string,
@@ -47,7 +83,10 @@ export function fallbackSoilAnalysis(
 ): SoilAnalysisResult {
   const { color = "brown", texture = "loam", moisture = "moist" } = observation;
 
-  const profiles: Record<string, Omit<SoilAnalysisResult, "confidence">> = {
+  const profiles: Record<
+    string,
+    Omit<SoilAnalysisResult, "confidence" | "fertilityLevel" | "isFertile" | "fertilizers">
+  > = {
     "red-loam": {
       soilType: "Red loamy soil (Ferralsol)",
       soilTypeSw: "Udongo mwekundu wa tutokano",
@@ -164,9 +203,22 @@ export function fallbackSoilAnalysis(
     (a, b) => suitabilityOrder[a.suitability] - suitabilityOrder[b.suitability]
   );
 
+  const fertilityMeta: Record<string, { fertilityLevel: FertilityLevel; isFertile: boolean }> = {
+    "red-loam": { fertilityLevel: "moderate", isFertile: true },
+    "red-clay": { fertilityLevel: "moderate", isFertile: true },
+    "black-clay": { fertilityLevel: "high", isFertile: true },
+    "yellow-sandy": { fertilityLevel: "low", isFertile: false },
+    "brown-loam": { fertilityLevel: "high", isFertile: true },
+  };
+
+  const meta = fertilityMeta[fallbackKey] ?? { fertilityLevel: "moderate" as FertilityLevel, isFertile: true };
+  const fertilizers = defaultFertilizers(!meta.isFertile);
+
   if (isSw) {
     return {
       ...profile,
+      ...meta,
+      fertilizers,
       confidence,
       soilType: profile.soilTypeSw,
       description: profile.descriptionSw,
@@ -187,5 +239,5 @@ export function fallbackSoilAnalysis(
     };
   }
 
-  return { ...profile, confidence };
+  return { ...profile, ...meta, fertilizers, confidence };
 }

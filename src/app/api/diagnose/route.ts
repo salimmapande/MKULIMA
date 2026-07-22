@@ -14,9 +14,17 @@ export async function POST(req: NextRequest) {
   } catch {
     return NextResponse.json(
       {
+        cropName: "Unknown",
+        cropNameSw: "Haijulikani",
+        healthStatus: "moderate",
+        isHealthy: false,
         issue: "Analysis failed",
         confidence: 0,
+        pestCategory: "none",
+        pestOrPathogen: "",
+        pestOrPathogenSw: "",
         treatment: "Please try again with a clearer photo.",
+        treatmentProducts: [],
         prevention: "",
       },
       { status: 500 }

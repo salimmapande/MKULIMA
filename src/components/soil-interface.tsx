@@ -10,6 +10,9 @@ import {
   TreeDeciduous,
   Sparkles,
   Shovel,
+  FlaskConical,
+  CheckCircle2,
+  XCircle,
 } from "lucide-react";
 import { getProfile } from "@/lib/storage";
 import {
@@ -19,6 +22,7 @@ import {
 } from "@/lib/soil";
 import type {
   FarmerProfile,
+  FertilityLevel,
   SoilAnalysisResult,
   SoilColor,
   SoilMoisture,
@@ -38,6 +42,19 @@ const suitabilityLabels = {
   excellent: { en: "Excellent", sw: "Bora sana" },
   good: { en: "Good", sw: "Nzuri" },
   moderate: { en: "Moderate", sw: "Wastani" },
+};
+
+const fertilityLabels: Record<FertilityLevel, { en: string; sw: string }> = {
+  high: { en: "High Fertility", sw: "Rutuba ya Juu" },
+  moderate: { en: "Moderate Fertility", sw: "Rutuba ya Wastani" },
+  low: { en: "Low Fertility", sw: "Rutuba ya Chini" },
+  poor: { en: "Poor Fertility", sw: "Rutuba Duni" },
+};
+
+const fertilizerTypeLabels = {
+  chemical: { en: "Chemical", sw: "Kikemikali" },
+  organic: { en: "Organic", sw: "Asili" },
+  manure: { en: "Manure", sw: "Mbolea ya mifugo" },
 };
 
 function ChipSelect<T extends string>({
@@ -137,8 +154,8 @@ export function SoilInterface() {
         </div>
         <p className="mt-1 text-sm text-muted">
           {isSw
-            ? "Piga picha ya udongo wako — AI itapendekeza mazao na miti inayofaa"
-            : "Capture your soil — AI will recommend suitable crops and trees"}
+            ? "Piga picha ya udongo — AI itachambua aina, rutuba, mbolea na mazao yanayofaa"
+            : "Capture your soil — AI analyzes type, fertility, fertilizers and suitable crops"}
         </p>
       </div>
 
@@ -201,8 +218,8 @@ export function SoilInterface() {
               </p>
               <p className="mt-1 text-xs text-muted">
                 {isSw
-                  ? "Chimba senti 15–20 na piga picha safi ya uso wa udongo"
-                  : "Dig 15–20 cm and photograph a clear cross-section"}
+                  ? "Chimba senti 15–20 na piga picha safi ya uso wa udongo au mchanga"
+                  : "Dig 15–20 cm and photograph soil or sand cross-section clearly"}
               </p>
             </div>
           </button>
@@ -284,6 +301,41 @@ export function SoilInterface() {
                 </div>
               </Card>
 
+              <Card className={result.isFertile ? "bg-forest/5" : "bg-wheat/20"}>
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    {result.isFertile ? (
+                      <CheckCircle2 className="h-5 w-5 text-forest" />
+                    ) : (
+                      <XCircle className="h-5 w-5 text-terracotta" />
+                    )}
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-forest">
+                        {isSw ? "Rutuba ya Udongo" : "Soil Fertility"}
+                      </p>
+                      <p className="text-sm font-semibold text-soil">
+                        {fertilityLabels[result.fertilityLevel]?.[isSw ? "sw" : "en"] ??
+                          result.properties.fertility}
+                      </p>
+                    </div>
+                  </div>
+                  <span
+                    className={cn(
+                      "rounded-full px-2 py-0.5 text-[10px] font-bold uppercase",
+                      result.isFertile ? "bg-forest/15 text-forest" : "bg-terracotta/15 text-terracotta"
+                    )}
+                  >
+                    {result.isFertile
+                      ? isSw
+                        ? "Tajiri"
+                        : "Fertile"
+                      : isSw
+                        ? "Inahitaji mbolea"
+                        : "Needs fertilizer"}
+                  </span>
+                </div>
+              </Card>
+
               <div className="grid grid-cols-2 gap-2">
                 {(
                   [
@@ -318,6 +370,39 @@ export function SoilInterface() {
                   items={trees}
                   isSw={isSw}
                 />
+              )}
+
+              {result.fertilizers && result.fertilizers.length > 0 && (
+                <div>
+                  <div className="mb-2 flex items-center gap-2">
+                    <FlaskConical className="h-4 w-4 text-terracotta" />
+                    <h2 className="font-display text-sm font-semibold text-forest">
+                      {isSw ? "Mbolea na Mavure Yanayopendekezwa" : "Recommended Fertilizers & Manure"}
+                    </h2>
+                  </div>
+                  <div className="space-y-2">
+                    {result.fertilizers.map((f) => (
+                      <Card key={f.name} className="!p-3">
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <p className="font-semibold text-soil">
+                              {isSw ? f.nameSw || f.name : f.name}
+                            </p>
+                            <p className="mt-0.5 text-[10px] font-medium uppercase text-muted">
+                              {fertilizerTypeLabels[f.type][isSw ? "sw" : "en"]}
+                            </p>
+                            <p className="mt-1 text-xs font-medium text-forest">
+                              {isSw ? f.amountSw || f.amount : f.amount}
+                            </p>
+                            <p className="mt-1 text-xs text-muted">
+                              {isSw ? f.reasonSw || f.reason : f.reason}
+                            </p>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
               )}
 
               <Card className="bg-sage-light/30">

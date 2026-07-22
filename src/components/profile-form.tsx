@@ -118,7 +118,7 @@ export function ProfileForm() {
         />
 
         <Field
-          label={isSw ? "Simu (si lazima)" : "Phone (optional)"}
+          label={isSw ? "Simu (kwa arifa za SMS)" : "Phone (for SMS alerts)"}
           value={profile.phone}
           onChange={(v) => update("phone", v)}
           placeholder={`${SITE_CONFIG.phonePrefix}7...`}
