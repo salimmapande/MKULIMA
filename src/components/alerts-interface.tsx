@@ -154,25 +154,36 @@ export function AlertsInterface() {
           provider: selectedProvider,
           phone: profile.phone,
           packageId: selectedPackage.id,
+          language: profile.language,
         }),
       });
       const data = await res.json();
       if (data.transaction && data.payment) {
         saveSmsTransaction(data.transaction);
-        setPaymentMessage(isSw ? data.payment.instructionsSw : data.payment.instructions);
 
-        setTimeout(async () => {
+        if (data.instantComplete) {
           updateSmsTransaction(data.transaction.id, { status: "completed" });
           const newBal = addSmsCredits(selectedPackage.credits);
           setBalance(newBal);
-          setPaymentMessage(
-            isSw
-              ? `Malipo yamekamilika! Salio jipya: SMS ${newBal}`
-              : `Payment complete! New balance: ${newBal} SMS`
-          );
+          setPaymentMessage(data.message ?? (isSw ? "Ununuzi umekamilika!" : "Purchase complete!"));
           setSelectedPackage(null);
           setSelectedProvider(null);
-        }, 3000);
+        } else {
+          setPaymentMessage(isSw ? data.payment.instructionsSw : data.payment.instructions);
+
+          setTimeout(() => {
+            updateSmsTransaction(data.transaction.id, { status: "completed" });
+            const newBal = addSmsCredits(selectedPackage.credits);
+            setBalance(newBal);
+            setPaymentMessage(
+              isSw
+                ? `Malipo yamekamilika! Salio jipya: SMS ${newBal}`
+                : `Payment complete! New balance: ${newBal} SMS`
+            );
+            setSelectedPackage(null);
+            setSelectedProvider(null);
+          }, 3000);
+        }
       } else {
         setPaymentMessage(data.error ?? (isSw ? "Malipo yameshindwa" : "Payment failed"));
       }
@@ -381,13 +392,23 @@ export function AlertsInterface() {
           ) : (
             <CreditCard className="h-5 w-5" />
           )}
-          {isSw ? "Lipa kwa Simu" : "Pay with Mobile Money"}
+          {isSw
+            ? selectedProvider === "twilio"
+              ? "Nunua Mtandaoni"
+              : "Lipa kwa Simu"
+            : selectedProvider === "twilio"
+              ? "Buy Online"
+              : "Pay with Mobile Money"}
         </button>
 
         <p className="mt-2 text-center text-[10px] text-muted">
           {isSw
-            ? `M-Pesa, Mixx by Yas, Airtel Money, Halotel Money — ${SITE_CONFIG.country}`
-            : `M-Pesa, Mixx by Yas, Airtel Money, Halotel Money — ${SITE_CONFIG.country}`}
+            ? selectedProvider === "twilio"
+              ? "Malipo ya mtandaoni kupitia Twilio SMS API"
+              : `M-Pesa, Mixx by Yas, Airtel Money, Halotel Money — ${SITE_CONFIG.country}`
+            : selectedProvider === "twilio"
+              ? "Online purchase powered by Twilio SMS API"
+              : `M-Pesa, Mixx by Yas, Airtel Money, Halotel Money — ${SITE_CONFIG.country}`}
         </p>
       </section>
 

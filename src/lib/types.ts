@@ -122,7 +122,7 @@ export interface SoilAnalysisResult {
   improvementsSw: string;
 }
 
-export type MobileMoneyProvider = "mpesa" | "mixx" | "airtel" | "halotel";
+export type MobileMoneyProvider = "mpesa" | "mixx" | "airtel" | "halotel" | "twilio";
 
 export interface SmsPackage {
   id: string;

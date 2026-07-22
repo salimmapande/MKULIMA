@@ -23,6 +23,7 @@ export const MOBILE_MONEY_PROVIDERS: {
   { id: "mixx", name: "Mixx by Yas", nameSw: "Mixx by Yas", color: "#0066CC", prefix: "Yas" },
   { id: "airtel", name: "Airtel Money", nameSw: "Airtel Money", color: "#ED1C24", prefix: "Airtel" },
   { id: "halotel", name: "Halotel Money", nameSw: "Halotel Money", color: "#FF6600", prefix: "Halotel" },
+  { id: "twilio", name: "Buy Online", nameSw: "Nunua Mtandaoni", color: "#F22F46", prefix: "Twilio" },
 ];
 
 export function getPackageById(id: string): SmsPackage | undefined {
@@ -37,16 +38,82 @@ export function formatTzs(amount: number): string {
   }).format(amount);
 }
 
-export async function sendSmsViaProvider(
+export function normalizePhone(phone: string): string {
+  const cleaned = phone.replace(/\s/g, "");
+  if (cleaned.startsWith("+")) return cleaned;
+  if (cleaned.startsWith("255")) return `+${cleaned}`;
+  if (cleaned.startsWith("0")) return `+255${cleaned.slice(1)}`;
+  return `+255${cleaned}`;
+}
+
+function twilioConfigured(): boolean {
+  return Boolean(
+    process.env.TWILIO_ACCOUNT_SID &&
+      process.env.TWILIO_AUTH_TOKEN &&
+      process.env.TWILIO_PHONE_NUMBER
+  );
+}
+
+export async function sendSmsViaTwilio(
   phone: string,
   message: string
 ): Promise<{ success: boolean; messageId?: string; error?: string }> {
+  const accountSid = process.env.TWILIO_ACCOUNT_SID;
+  const authToken = process.env.TWILIO_AUTH_TOKEN;
+  const from = process.env.TWILIO_PHONE_NUMBER;
+
+  if (!accountSid || !authToken || !from) {
+    return { success: false, error: "Twilio not configured" };
+  }
+
+  try {
+    const to = normalizePhone(phone);
+    const credentials = btoa(`${accountSid}:${authToken}`);
+    const res = await fetch(
+      `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Basic ${credentials}`,
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({ To: to, From: from, Body: message }),
+      }
+    );
+
+    const data = (await res.json()) as {
+      sid?: string;
+      message?: string;
+      status?: string;
+    };
+
+    if (res.ok && data.sid) {
+      return { success: true, messageId: data.sid };
+    }
+
+    return { success: false, error: data.message ?? "Twilio SMS failed" };
+  } catch (err) {
+    return { success: false, error: err instanceof Error ? err.message : "Twilio error" };
+  }
+}
+
+export async function sendSmsViaProvider(
+  phone: string,
+  message: string
+): Promise<{ success: boolean; messageId?: string; error?: string; provider?: string }> {
+  if (twilioConfigured()) {
+    const twilioResult = await sendSmsViaTwilio(phone, message);
+    if (twilioResult.success) {
+      return { ...twilioResult, provider: "twilio" };
+    }
+  }
+
   const username = process.env.AFRICAS_TALKING_USERNAME;
   const apiKey = process.env.AFRICAS_TALKING_API_KEY;
 
   if (username && apiKey) {
     try {
-      const normalizedPhone = phone.startsWith("+") ? phone : `+255${phone.replace(/^0/, "")}`;
+      const normalizedPhone = normalizePhone(phone);
       const res = await fetch("https://api.africastalking.com/version1/messaging", {
         method: "POST",
         headers: {
@@ -66,7 +133,7 @@ export async function sendSmsViaProvider(
       };
       const recipient = data.SMSMessageData?.Recipients?.[0];
       if (recipient?.status === "Success") {
-        return { success: true, messageId: recipient.messageId };
+        return { success: true, messageId: recipient.messageId, provider: "africas_talking" };
       }
       return { success: false, error: recipient?.status ?? "SMS delivery failed" };
     } catch (err) {
@@ -74,9 +141,18 @@ export async function sendSmsViaProvider(
     }
   }
 
-  // Demo mode when no SMS provider configured
   console.log(`[SMS Demo] To: ${phone} | Message: ${message}`);
-  return { success: true, messageId: `demo_${Date.now()}` };
+  return { success: true, messageId: `demo_${Date.now()}`, provider: "demo" };
+}
+
+export function buildPurchaseConfirmationSms(
+  credits: number,
+  balance: number,
+  isSw: boolean
+): string {
+  return isSw
+    ? `Mkulima: Umefanikiwa kununua SMS ${credits}. Salio jipya: ${balance}. Asante!`
+    : `Mkulima: You purchased ${credits} SMS credits. New balance: ${balance}. Thank you!`;
 }
 
 export function buildWateringSmsMessage(
@@ -118,6 +194,24 @@ export async function initiateMobilePayment(
 
   const reference = buildPaymentReference(transactionId);
   const normalizedPhone = phone.replace(/\s/g, "");
+
+  if (provider === "twilio") {
+    const instructionsEn = twilioConfigured()
+      ? `Online purchase via Twilio. ${formatTzs(pkg.priceTzs)} for ${pkg.credits} SMS credits. Payment processing...`
+      : `Demo online purchase: ${formatTzs(pkg.priceTzs)} for ${pkg.credits} SMS credits.`;
+    return {
+      transactionId,
+      reference,
+      provider,
+      amountTzs: pkg.priceTzs,
+      phone: normalizedPhone,
+      status: "pending",
+      instructions: instructionsEn,
+      instructionsSw: twilioConfigured()
+        ? `Ununuzi mtandaoni kupitia Twilio. ${formatTzs(pkg.priceTzs)} kwa SMS ${pkg.credits}. Inachakatwa...`
+        : `Ununuzi wa majaribio mtandaoni: ${formatTzs(pkg.priceTzs)} kwa SMS ${pkg.credits}.`,
+    };
+  }
 
   const selcomApiKey = process.env.SELCOM_API_KEY;
   const selcomSecret = process.env.SELCOM_API_SECRET;

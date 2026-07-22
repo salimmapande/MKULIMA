@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Save, Check } from "lucide-react";
 import { getProfile, saveProfile, defaultProfile } from "@/lib/storage";
 import { cropLabels, tanzanianRegions } from "@/lib/crops";
@@ -12,6 +13,7 @@ import { cn } from "@/lib/utils";
 const allCrops = Object.keys(cropLabels) as CropType[];
 
 export function ProfileForm() {
+  const router = useRouter();
   const [profile, setProfile] = useState<FarmerProfile>(defaultProfile);
   const [saved, setSaved] = useState(false);
 
@@ -37,7 +39,7 @@ export function ProfileForm() {
   function handleSave() {
     saveProfile(profile);
     setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    setTimeout(() => router.push("/"), 800);
   }
 
   const isSw = profile.language === "sw";
